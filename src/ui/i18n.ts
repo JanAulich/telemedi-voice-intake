@@ -6,7 +6,9 @@ export interface PatientStrings {
   tapToSpeak: string;
   tapToStop: string;
   recording: string;
+  getReady: string;
   processing: string;
+  notHeard: string;
   micDenied: string;
   genericError: string;
   yourAnswer: string;
@@ -35,8 +37,10 @@ export const PATIENT: Record<PatientLanguage, PatientStrings> = {
     progress: (n, t) => `Question ${n} of ${t}`,
     tapToSpeak: 'Tap to speak',
     tapToStop: 'Tap to stop',
-    recording: 'Listening…',
+    recording: 'Speak now',
+    getReady: 'Get ready…',
     processing: 'Transcribing…',
+    notHeard: 'I didn’t catch that. Tap the microphone and try again, a little slower, or type your answer.',
     micDenied: 'Microphone access was denied. Please allow it in your settings, or type your answer.',
     genericError: 'Something went wrong. Please try again or type your answer.',
     yourAnswer: 'Your answer (you can correct it)',
@@ -71,8 +75,10 @@ export const PATIENT: Record<PatientLanguage, PatientStrings> = {
     progress: (n, t) => `Pytanie ${n} z ${t}`,
     tapToSpeak: 'Dotknij, aby mówić',
     tapToStop: 'Dotknij, aby zakończyć',
-    recording: 'Słucham…',
+    recording: 'Mów teraz',
+    getReady: 'Przygotuj się…',
     processing: 'Przetwarzam nagranie…',
+    notHeard: 'Nie usłyszałem odpowiedzi. Dotknij mikrofonu i spróbuj jeszcze raz, trochę wolniej, lub wpisz odpowiedź.',
     micDenied: 'Brak dostępu do mikrofonu. Zezwól na dostęp w ustawieniach lub wpisz odpowiedź.',
     genericError: 'Coś poszło nie tak. Spróbuj ponownie lub wpisz odpowiedź.',
     yourAnswer: 'Twoja odpowiedź (możesz ją poprawić)',
@@ -107,8 +113,10 @@ export const PATIENT: Record<PatientLanguage, PatientStrings> = {
     progress: (n, t) => `Питання ${n} з ${t}`,
     tapToSpeak: 'Натисніть, щоб говорити',
     tapToStop: 'Натисніть, щоб зупинити',
-    recording: 'Слухаю…',
+    recording: 'Говоріть',
+    getReady: 'Приготуйтеся…',
     processing: 'Обробка запису…',
+    notHeard: 'Не вдалося почути відповідь. Натисніть мікрофон і спробуйте ще раз, трохи повільніше, або введіть відповідь.',
     micDenied: 'Немає доступу до мікрофона. Дозвольте доступ у налаштуваннях або введіть відповідь.',
     genericError: 'Щось пішло не так. Спробуйте ще раз або введіть відповідь.',
     yourAnswer: 'Ваша відповідь (можна виправити)',

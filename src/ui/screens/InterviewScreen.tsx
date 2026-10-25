@@ -25,7 +25,18 @@ const RECORDING_OPTIONS: RecordingOptions = {
   web: { mimeType: Platform.OS === 'web' ? webRecordingMimeType() : 'audio/webm', bitsPerSecond: 32000 },
 };
 
-type Phase = 'idle' | 'recording' | 'processing';
+type Phase = 'idle' | 'preparing' | 'recording' | 'processing';
+
+/** Recording already runs during "Get ready…", so the first word is never cut off. */
+const GET_READY_MS = 700;
+/** Keep recording briefly after "stop" so the last syllable is not clipped. */
+const TAIL_MS = 400;
+/** Very short takes are padded to this length; Whisper struggles with clips under ~1 s. */
+const MIN_TAKE_MS = 1200;
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+const errorCode = (e: unknown): string | undefined =>
+  typeof e === 'object' && e !== null && 'code' in e ? String((e as { code: unknown }).code) : undefined;
 
 export function InterviewScreen({
   lang,
@@ -56,6 +67,7 @@ export function InterviewScreen({
   const [typed, setTyped] = useState('');
   const mounted = useRef(true);
   const recording = useRef(false);
+  const startedAt = useRef(0);
 
   useEffect(() => {
     mounted.current = true;
@@ -100,10 +112,14 @@ export function InterviewScreen({
       }
       await setAudioModeAsync({ playsInSilentMode: true, allowsRecording: true });
       // Prepare before every take: on web stop() discards the underlying MediaRecorder.
+      setPhase('preparing');
       await recorder.prepareToRecordAsync();
       recorder.record();
       recording.current = true;
-      setPhase('recording');
+      startedAt.current = Date.now();
+      // Give the microphone a moment to warm up before telling the patient to speak.
+      await sleep(GET_READY_MS);
+      if (mounted.current && recording.current) setPhase('recording');
     } catch {
       setError(t.micDenied);
       setPhase('idle');
@@ -116,14 +132,17 @@ export function InterviewScreen({
     setError(null);
     let uri: string | null = null;
     try {
+      const elapsed = Date.now() - startedAt.current;
+      await sleep(Math.max(TAIL_MS, MIN_TAKE_MS - elapsed));
       await recorder.stop();
       uri = recorder.uri;
       if (!uri) throw new Error('no audio');
       const mimeType = await detectMimeType(uri);
-      await onAudio({ uri, mimeType });
-    } catch {
+      await onAudio({ uri, mimeType, durationMs: Date.now() - startedAt.current } as AudioInput);
+    } catch (e) {
       if (uri) await discardAudio(uri); // safe if the engine already deleted it
-      if (mounted.current) setError(t.genericError);
+      // Only the error code is used; engine messages are never shown.
+      if (mounted.current) setError(errorCode(e) === 'empty_transcript' ? t.notHeard : t.genericError);
     } finally {
       if (mounted.current) setPhase('idle');
     }
@@ -146,7 +165,14 @@ export function InterviewScreen({
     });
   };
 
-  const micLabel = phase === 'recording' ? t.tapToStop : phase === 'processing' ? t.processing : t.tapToSpeak;
+  const micLabel =
+    phase === 'recording'
+      ? t.tapToStop
+      : phase === 'preparing'
+        ? t.getReady
+        : phase === 'processing'
+          ? t.processing
+          : t.tapToSpeak;
   const done = question === null;
 
   return (
@@ -180,8 +206,11 @@ export function InterviewScreen({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={micLabel}
-            accessibilityState={{ disabled: phase === 'processing', busy: phase === 'processing' }}
-            disabled={phase === 'processing'}
+            accessibilityState={{
+              disabled: phase === 'processing' || phase === 'preparing',
+              busy: phase === 'processing' || phase === 'preparing',
+            }}
+            disabled={phase === 'processing' || phase === 'preparing'}
             onPress={onMic}
             style={({ pressed }) => [
               styles.mic,
@@ -190,7 +219,7 @@ export function InterviewScreen({
               pressed && { opacity: 0.85 },
             ]}
           >
-            {phase === 'processing' ? (
+            {phase === 'processing' || phase === 'preparing' ? (
               <ActivityIndicator color="#FFFFFF" size="large" />
             ) : phase === 'recording' ? (
               <View style={styles.stopSquare} />
@@ -207,7 +236,7 @@ export function InterviewScreen({
 
       {error ? <ErrorText>{error}</ErrorText> : null}
 
-      {!done && phase !== 'recording' ? (
+      {!done && phase !== 'recording' && phase !== 'preparing' ? (
         typing ? (
           <Card>
             <TextInput
