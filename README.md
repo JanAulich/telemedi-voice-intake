@@ -11,7 +11,7 @@ React Native + Expo (SDK 58, TypeScript). AI: Groq (Whisper speech-to-text, gpt-
 npm install
 npx expo start --web
 ```
-Open the page, paste a Groq API key (free at console.groq.com), or continue without a key to see the flow in demo mode. iOS/Android: `npx expo start` and open in Expo Go.
+Open the page, paste a Groq API key (free at console.groq.com), or continue without a key to see the flow in demo mode. For repeated local testing, copy `.env.example` to `.env.local` (git-ignored) and set the key there to pre-fill the field; do not use this for a published build. iOS/Android: `npx expo start` and open in Expo Go.
 
 ## Test
 ```bash

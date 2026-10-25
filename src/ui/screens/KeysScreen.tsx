@@ -8,8 +8,12 @@ export interface KeysResult {
   groqKey: string;
 }
 
+// Optional local test key from .env.local (git-ignored). Expo inlines EXPO_PUBLIC_* at build time,
+// so never set it for a build you publish.
+const LOCAL_TEST_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY ?? '';
+
 export function KeysScreen({ onContinue }: { onContinue: (r: KeysResult) => void }) {
-  const [groqKey, setGroqKey] = useState('');
+  const [groqKey, setGroqKey] = useState(LOCAL_TEST_KEY);
   const [remember, setRemember] = useState(false);
   const [busy, setBusy] = useState(false);
 
