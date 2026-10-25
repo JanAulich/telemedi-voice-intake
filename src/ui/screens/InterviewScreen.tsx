@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import {
   AudioModule,
   RecordingPresets,
@@ -10,9 +10,14 @@ import {
 import type { AudioInput, PatientLanguage, Question, Turn } from '../../contract/types';
 import { detectMimeType, discardAudio, webRecordingMimeType } from '../audioFiles';
 import { PATIENT } from '../i18n';
-import { Button, Card, DemoBadge, ErrorText, H2, Page } from '../components/Primitives';
+import { Button, Card, DemoBadge, ErrorText, Field, H2, Page } from '../components/Primitives';
+import { MicButton, RecordingTimer } from '../components/MicButton';
 import { TurnEditor } from '../components/TurnEditor';
-import { colors, radius, space, TAP } from '../theme';
+import { space, TAP, type, useTheme } from '../theme';
+import type { Palette } from '../theme';
+
+/** Mirrors MAX_AUDIO_MS in engine/core/limits.ts (the engine rejects longer takes). Display only. */
+const MAX_TAKE_S = 60;
 
 // 16 kHz mono at ~32 kbps keeps uploads small; AAC/m4a on iOS and Android, webm or mp4 on web.
 const RECORDING_OPTIONS: RecordingOptions = {
@@ -60,6 +65,8 @@ export function InterviewScreen({
   onFinish: () => Promise<void>;
 }) {
   const t = PATIENT[lang];
+  const { c } = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const recorder = useAudioRecorder(RECORDING_OPTIONS);
   const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -178,14 +185,16 @@ export function InterviewScreen({
   return (
     <Page>
       <View style={styles.topRow}>
-        <View style={{ flex: 1, gap: space.xs }}>
+        <View style={styles.progressBlock}>
           <Text style={styles.progressText}>{t.progress(Math.min(answered + 1, total), total)}</Text>
           <View
             style={styles.track}
             accessibilityRole="progressbar"
             accessibilityValue={{ min: 0, max: total, now: answered }}
           >
-            <View style={[styles.fill, { width: `${Math.min(100, (answered / total) * 100)}%` }]} />
+            {Array.from({ length: total }, (_, i) => (
+              <View key={i} style={[styles.tick, i < answered && styles.tickDone]} />
+            ))}
           </View>
         </View>
         {demo ? <DemoBadge /> : null}
@@ -203,8 +212,8 @@ export function InterviewScreen({
 
       {!done ? (
         <View style={styles.micWrap}>
-          <Pressable
-            accessibilityRole="button"
+          <MicButton
+            phase={phase}
             accessibilityLabel={micLabel}
             accessibilityState={{
               disabled: phase === 'processing' || phase === 'preparing',
@@ -212,25 +221,12 @@ export function InterviewScreen({
             }}
             disabled={phase === 'processing' || phase === 'preparing'}
             onPress={onMic}
-            style={({ pressed }) => [
-              styles.mic,
-              phase === 'recording' && { backgroundColor: colors.danger },
-              phase === 'processing' && { backgroundColor: colors.muted },
-              pressed && { opacity: 0.85 },
-            ]}
-          >
-            {phase === 'processing' || phase === 'preparing' ? (
-              <ActivityIndicator color="#FFFFFF" size="large" />
-            ) : phase === 'recording' ? (
-              <View style={styles.stopSquare} />
-            ) : (
-              <MicGlyph />
-            )}
-          </Pressable>
+          />
           <Text style={styles.micLabel} accessibilityLiveRegion="polite">
             {phase === 'recording' ? t.recording : micLabel}
           </Text>
           {phase === 'recording' ? <Text style={styles.small}>{t.tapToStop}</Text> : null}
+          <RecordingTimer active={phase === 'recording'} maxSeconds={MAX_TAKE_S} />
         </View>
       ) : null}
 
@@ -239,13 +235,12 @@ export function InterviewScreen({
       {!done && phase !== 'recording' && phase !== 'preparing' ? (
         typing ? (
           <Card>
-            <TextInput
+            <Field
               accessibilityLabel={t.typePlaceholder}
               style={styles.input}
               value={typed}
               onChangeText={setTyped}
               placeholder={t.typePlaceholder}
-              placeholderTextColor={colors.muted}
               multiline
               textAlignVertical="top"
               editable={phase === 'idle'}
@@ -286,58 +281,20 @@ export function InterviewScreen({
   );
 }
 
-/** Simple microphone drawn with views so no icon package is needed. */
-function MicGlyph() {
-  return (
-    <View style={{ alignItems: 'center' }}>
-      <View style={styles.micBody} />
-      <View style={styles.micArc} />
-      <View style={styles.micStem} />
-    </View>
-  );
+function makeStyles(c: Palette) {
+  return StyleSheet.create({
+    topRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.md },
+    progressBlock: { flexGrow: 1, flexBasis: 140, gap: space.sm },
+    progressText: { ...type.caption, fontWeight: '700', color: c.accentInk },
+    track: { flexDirection: 'row', gap: 4 },
+    tick: { flex: 1, height: 8, borderRadius: 4, backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.fieldBorder },
+    tickDone: { backgroundColor: c.accent, borderColor: c.accent },
+    question: { ...type.question, color: c.ink, paddingTop: space.sm },
+    micWrap: { alignItems: 'center', gap: space.xs, paddingBottom: space.sm },
+    micLabel: { fontSize: 20, lineHeight: 26, fontWeight: '700', color: c.ink, textAlign: 'center' },
+    small: { ...type.body, color: c.muted, textAlign: 'center' },
+    input: { minHeight: TAP * 2, paddingTop: space.md },
+    actions: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, alignItems: 'center' },
+    cardHead: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: space.sm },
+  });
 }
-
-const styles = StyleSheet.create({
-  topRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  progressText: { fontSize: 15, fontWeight: '700', color: colors.primaryDark },
-  track: { height: 8, borderRadius: 4, backgroundColor: colors.border, overflow: 'hidden' },
-  fill: { height: 8, backgroundColor: colors.primary },
-  question: { fontSize: 30, lineHeight: 38, fontWeight: '800', color: colors.ink, paddingVertical: space.md },
-  micWrap: { alignItems: 'center', gap: space.sm, paddingVertical: space.md },
-  mic: {
-    width: 128,
-    height: 128,
-    borderRadius: 64,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  micLabel: { fontSize: 18, fontWeight: '700', color: colors.ink },
-  small: { fontSize: 14, color: colors.muted },
-  stopSquare: { width: 40, height: 40, borderRadius: 6, backgroundColor: '#FFFFFF' },
-  micBody: { width: 28, height: 48, borderRadius: 14, backgroundColor: '#FFFFFF' },
-  micArc: {
-    width: 48,
-    height: 24,
-    marginTop: -14,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    borderWidth: 4,
-    borderTopWidth: 0,
-    borderColor: '#FFFFFF',
-  },
-  micStem: { width: 4, height: 10, backgroundColor: '#FFFFFF' },
-  input: {
-    minHeight: TAP * 2,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: space.md,
-    fontSize: 17,
-    lineHeight: 24,
-    color: colors.ink,
-    backgroundColor: '#FFFFFF',
-  },
-  actions: { flexDirection: 'row', gap: space.sm, alignItems: 'center' },
-  cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.sm },
-});

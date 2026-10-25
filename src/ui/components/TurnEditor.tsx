@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import type { Turn } from '../../contract/types';
 import type { PatientStrings } from '../i18n';
-import { Button } from './Primitives';
-import { colors, radius, space, TAP } from '../theme';
+import { Button, Field } from './Primitives';
+import { space, TAP, type, useTheme } from '../theme';
+import type { Palette } from '../theme';
 
 /**
  * Shows one transcribed answer. In `open` mode the text is always editable;
@@ -20,6 +21,8 @@ export function TurnEditor({
   open?: boolean;
   onSave: (turnId: string, text: string) => void;
 }) {
+  const { c } = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const [editing, setEditing] = useState(!!open);
   const [draft, setDraft] = useState(turn.answerText);
 
@@ -41,7 +44,7 @@ export function TurnEditor({
       <Text style={styles.question}>{turn.questionText}</Text>
       {isEditing ? (
         <>
-          <TextInput
+          <Field
             accessibilityLabel={strings.yourAnswer}
             style={styles.input}
             value={draft}
@@ -79,21 +82,14 @@ export function TurnEditor({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { gap: space.sm },
-  question: { fontSize: 14, color: colors.muted, fontWeight: '600' },
-  answer: { flex: 1, fontSize: 16, lineHeight: 22, color: colors.ink },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  input: {
-    minHeight: TAP * 2,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: space.md,
-    fontSize: 17,
-    lineHeight: 24,
-    color: colors.ink,
-    backgroundColor: '#FFFFFF',
-  },
-  actions: { flexDirection: 'row', gap: space.sm, alignItems: 'center' },
-});
+function makeStyles(c: Palette) {
+  return StyleSheet.create({
+    wrap: { gap: space.sm },
+    // The question is metadata for the answer below it, so it stays a 15 pt caption.
+    question: { ...type.caption, color: c.muted, fontWeight: '600' },
+    answer: { ...type.body, flex: 1, minWidth: 160, color: c.ink },
+    row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.sm },
+    input: { minHeight: TAP * 2, paddingTop: space.md },
+    actions: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, alignItems: 'center' },
+  });
+}

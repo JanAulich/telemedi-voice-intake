@@ -17,7 +17,7 @@ import { EscalationScreen } from './src/ui/screens/EscalationScreen';
 import { InterviewScreen } from './src/ui/screens/InterviewScreen';
 import { KeysScreen } from './src/ui/screens/KeysScreen';
 import { SetupScreen, type SetupResult } from './src/ui/screens/SetupScreen';
-import { colors } from './src/ui/theme';
+import { fixed, useTheme } from './src/ui/theme';
 
 type Screen = 'keys' | 'setup' | 'interview' | 'escalation' | 'card';
 
@@ -25,6 +25,7 @@ const TOTAL_QUESTIONS = 8;
 const BACKGROUND_WIPE_MS = 2 * 60 * 1000;
 
 export default function App() {
+  const { c } = useTheme();
   const [screen, setScreen] = useState<Screen>('keys');
   const [groqKey, setGroqKey] = useState('');
   const [setup, setSetup] = useState<SetupResult>({ patientLanguage: 'pl', doctorLanguage: 'en' });
@@ -204,8 +205,8 @@ export default function App() {
   }
 
   return (
-    <View style={[styles.root, screen === 'escalation' && { backgroundColor: colors.danger }]}>
-      <StatusBar style={screen === 'escalation' ? 'light' : 'dark'} />
+    <View style={[styles.root, { backgroundColor: screen === 'escalation' ? fixed.emergency : c.bg }]}>
+      <StatusBar style={screen === 'escalation' ? 'light' : 'auto'} />
       {body}
     </View>
   );
@@ -214,7 +215,6 @@ export default function App() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.bg,
     paddingTop: Platform.select({ ios: 44, android: RNStatusBar.currentHeight ?? 24, default: 0 }),
   },
 });

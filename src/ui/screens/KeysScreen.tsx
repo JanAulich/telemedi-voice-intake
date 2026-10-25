@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Linking, Platform, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Linking, Platform, StyleSheet, Switch, Text, View } from 'react-native';
 import { engineIsReal, keyStore } from '../engineSource';
-import { Body, Button, Card, DemoBadge, H1, Page } from '../components/Primitives';
-import { colors, radius, space, TAP } from '../theme';
+import { Body, Button, Card, DemoBadge, Field, H1, Page } from '../components/Primitives';
+import { space, TAP, type, useTheme } from '../theme';
+import type { Palette } from '../theme';
 
 export interface KeysResult {
   groqKey: string;
@@ -13,6 +14,8 @@ export interface KeysResult {
 const LOCAL_TEST_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY ?? '';
 
 export function KeysScreen({ onContinue }: { onContinue: (r: KeysResult) => void }) {
+  const { c } = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const [groqKey, setGroqKey] = useState(LOCAL_TEST_KEY);
   const [remember, setRemember] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -64,10 +67,9 @@ export function KeysScreen({ onContinue }: { onContinue: (r: KeysResult) => void
         <Text style={styles.label} nativeID="groqLabel">
           Groq API key
         </Text>
-        <TextInput
+        <Field
           accessibilityLabel="Groq API key"
           accessibilityLabelledBy="groqLabel"
-          style={styles.input}
           value={groqKey}
           onChangeText={setGroqKey}
           secureTextEntry
@@ -76,22 +78,30 @@ export function KeysScreen({ onContinue }: { onContinue: (r: KeysResult) => void
           autoComplete="off"
           spellCheck={false}
           placeholder="gsk_…"
-          placeholderTextColor={colors.muted}
         />
         <View style={styles.row}>
+          {/* Tapping the words toggles too (bigger target); the Switch carries the accessible name. */}
+          <Text
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            style={styles.rowLabel}
+            onPress={() => setRemember((v) => !v)}
+          >
+            Remember keys on this device
+          </Text>
           <Switch
             accessibilityLabel="Remember keys on this device"
             value={remember}
             onValueChange={setRemember}
-            trackColor={{ true: colors.primary, false: colors.border }}
+            trackColor={{ true: c.accent, false: c.fieldBorder }}
+            thumbColor="#FFFFFF"
           />
-          <Text style={[styles.body, { flex: 1 }]}>Remember keys on this device</Text>
         </View>
-        <Text style={styles.small}>
+        <Body muted>
           {Platform.OS === 'web'
             ? 'Your key stays in this browser tab and is sent only to api.groq.com. On the web it is never saved.'
             : 'Your key stays on this device. If you tick the box it is stored in the secure keychain; otherwise it lives in memory until you close the app. It is sent only to api.groq.com.'}
-        </Text>
+        </Body>
         <Text
           accessibilityRole="link"
           style={styles.link}
@@ -103,28 +113,25 @@ export function KeysScreen({ onContinue }: { onContinue: (r: KeysResult) => void
       <Button label="Continue" onPress={() => proceed(true)} disabled={!hasKey} loading={busy} />
       <Button label="Continue without a key (demo mode)" variant="secondary" onPress={() => proceed(false)} disabled={busy} />
       {!engineIsReal && hasKey ? (
-        <Text style={styles.small}>The real engine is not wired into this build yet, so the demo engine will run.</Text>
+        <Body muted>The real engine is not wired into this build yet, so the demo engine will run.</Body>
       ) : null}
     </Page>
   );
 }
 
-const styles = StyleSheet.create({
-  header: { gap: space.sm, paddingTop: space.md },
-  brand: { color: colors.primaryDark, fontWeight: '800', fontSize: 14, letterSpacing: 0.6, textTransform: 'uppercase' },
-  label: { fontSize: 16, fontWeight: '700', color: colors.ink },
-  input: {
-    minHeight: TAP + 4,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: space.md,
-    fontSize: 17,
-    color: colors.ink,
-    backgroundColor: '#FFFFFF',
-  },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: TAP },
-  body: { fontSize: 17, color: colors.ink },
-  small: { fontSize: 14, lineHeight: 20, color: colors.muted },
-  link: { fontSize: 16, color: colors.primaryDark, textDecorationLine: 'underline', paddingVertical: space.sm },
-});
+function makeStyles(c: Palette) {
+  return StyleSheet.create({
+    header: { gap: space.sm, paddingTop: space.md },
+    brand: { ...type.label, color: c.accentInk, textTransform: 'uppercase' },
+    label: { ...type.bodyStrong, color: c.ink },
+    row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md, minHeight: TAP + 4 },
+    rowLabel: { ...type.body, color: c.ink, flex: 1 },
+    link: {
+      ...type.body,
+      color: c.accentInk,
+      textDecorationLine: 'underline',
+      paddingVertical: space.md,
+      minHeight: TAP,
+    },
+  });
+}

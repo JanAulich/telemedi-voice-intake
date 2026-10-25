@@ -2,9 +2,13 @@ import { Linking, Platform, StyleSheet, Text, View } from 'react-native';
 import type { PatientLanguage, RedFlagHit } from '../../contract/types';
 import { PATIENT } from '../i18n';
 import { Button, Page } from '../components/Primitives';
-import { colors, radius, space } from '../theme';
+import { fixed, radius, space } from '../theme';
 
-/** Full-screen red emergency screen. Shown immediately when a red flag is detected. */
+/**
+ * Full-screen red emergency screen. Shown immediately when a red flag is detected: no entrance
+ * animation, no transition, and the same red and white in light and dark appearance.
+ * Order: what is happening, the one action (call 112), what was detected, then the way on.
+ */
 export function EscalationScreen({
   lang,
   hits,
@@ -21,7 +25,7 @@ export function EscalationScreen({
   };
 
   return (
-    <Page background={colors.danger}>
+    <Page background={fixed.emergency}>
       <View accessibilityRole="alert" style={{ gap: space.md, paddingTop: space.xl }}>
         <Text accessibilityRole="header" style={styles.title}>
           {t.emergencyTitle}
@@ -29,7 +33,7 @@ export function EscalationScreen({
         <Text style={styles.body}>{t.emergencyBody}</Text>
       </View>
 
-      <Button label={t.call112} variant="light" onPress={call} style={styles.call} />
+      <Button label={t.call112} variant="light" large onPress={call} />
 
       <View style={styles.detected}>
         <Text style={styles.detectedTitle}>{t.detected}</Text>
@@ -42,18 +46,17 @@ export function EscalationScreen({
       </View>
 
       <Text style={styles.hint}>{t.continueHint}</Text>
-      <Button label={t.continueAnyway} variant="secondary" onPress={onContinue} />
+      <Button label={t.continueAnyway} variant="outlineLight" onPress={onContinue} />
     </Page>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { color: '#FFFFFF', fontSize: 34, lineHeight: 40, fontWeight: '900' },
-  body: { color: '#FFFFFF', fontSize: 20, lineHeight: 28, fontWeight: '600' },
-  call: { minHeight: 72 },
-  detected: { backgroundColor: colors.dangerDark, borderRadius: radius.md, padding: space.lg, gap: space.md },
-  detectedTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
-  flag: { color: '#FFFFFF', fontSize: 20, fontWeight: '800' },
-  matched: { color: '#FFE3E6', fontSize: 16, fontStyle: 'italic' },
-  hint: { color: '#FFFFFF', fontSize: 15, lineHeight: 21 },
+  title: { color: fixed.onEmergency, fontSize: 32, lineHeight: 38, fontWeight: '700', letterSpacing: -0.3 },
+  body: { color: fixed.onEmergency, fontSize: 20, lineHeight: 28, fontWeight: '500' },
+  detected: { backgroundColor: fixed.emergencyDeep, borderRadius: radius.lg, borderCurve: 'continuous', padding: space.lg, gap: space.md },
+  detectedTitle: { color: fixed.onEmergency, fontSize: 17, lineHeight: 24, fontWeight: '600' },
+  flag: { color: fixed.onEmergency, fontSize: 20, lineHeight: 26, fontWeight: '700' },
+  matched: { color: fixed.onEmergencySoft, fontSize: 17, lineHeight: 24, fontStyle: 'italic' },
+  hint: { color: fixed.onEmergency, fontSize: 17, lineHeight: 24 },
 });
