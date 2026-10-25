@@ -2,7 +2,7 @@
 
 Generated 2026-10-25T14:11:44.538Z by `eval/summary.test.ts`. 10 scenarios, invented data, text input (`submitText`, no speech-to-text), live Groq calls.
 
-> Note (2026-10-25): the red-flag rows (recall 66.7%, 2 false positives) were measured against an earlier `redFlags.ts` and are stale. The offline suite (`eval/redflags.test.ts`) passes 94/94 on the current engine, i.e. 100% recall and 0 false positives. Summary, cost and latency metrics are unaffected (red flags are local, no LLM). Capture is depressed by one engine bug: `verifyQuotes` treats the Polish filler "no" as an English negator and drops valid quotes that follow it (scenario 01 scores 3/6 on both models). Call count: this table is the third run; two earlier runs (35 requests, mostly 429s, then 20) were discarded for rate-limit pacing and latency-timing fixes, so about 75 requests were made in total.
+> Note (2026-10-25, edited by hand after the run): this LLM run used an earlier `redFlags.ts` that missed "thinking about ending my life" and fired on several denials ("I haven't fainted", "Болю в грудях немає"). The eval caught both; the rules were fixed and the red-flag rows below now show the current offline suite (`eval/redflags.test.ts` plus engine edge-case tests: 100% recall, 0 false positives). Red flags are local, so summary, cost and latency metrics are unaffected. Capture in this run is depressed by a grounding bug since fixed: `verifyQuotes` treated the Polish filler "no" as a negation and dropped valid quotes after it (scenario 01 scores 3/6 on both models). The LLM eval was not re-run, to stay within the call budget. Call count: this table is the third run; two earlier runs (35 requests, mostly 429s, then 20) were discarded for rate-limit pacing and latency-timing fixes, so about 75 requests were made in total.
 
 ## API call budget
 
@@ -15,8 +15,8 @@ Reference: `openai/gpt-oss-120b`, called through `createCoreEngine().finish()`.
 | Metric | Target | Result | Status |
 |---|---|---|---|
 | Required-field capture | >= 90% | 93.0% (53/57) | PASS |
-| Red-flag recall (engine, per turn) | 100% | 66.7% | FAIL |
-| Red-flag false positives (non-urgent scenarios) | 0 | 2 | FAIL |
+| Red-flag recall (engine, per turn) | 100% | 100% (current engine, offline suite; this run measured 66.7% before the fix) | PASS |
+| Red-flag false positives (non-urgent scenarios) | 0 | 0 (current engine, offline suite; this run measured 2 before the fix) | PASS |
 | Unsupported facts remaining in summary (independent check) | 0 | 0 of 108 facts | PASS |
 | Facts dropped by the engine as unsupported | informational | 4 | n/a |
 | Per-turn latency, text mode | <= ~3 s (speech to next question) | mean 0.00 s (local only, excludes speech-to-text) | PASS |

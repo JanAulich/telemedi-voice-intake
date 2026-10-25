@@ -60,10 +60,18 @@ Whole intake today is roughly $0.004 (speech-to-text is ~80% of it, billed at a 
 A data-processing agreement and EU-hosted processing for speech and LLM calls (Groq processes in the US and, without zero-data-retention enabled, may keep request logs for up to 30 days for abuse monitoring — fine for test data, not for patients), clinician sign-off on the red-flag list, a pilot measuring intake minutes saved, and integration with Telemedi's consultation system.
 
 ## How it was built
-Coordinated with Claude Code: one Opus session wrote the brief, PRD, shared contract and file-ownership plan, then four Sonnet agents worked in parallel on the engine, UI, evaluation set and a fact-checking research note. Full logs are attached.
+With Claude Code, as a coordinated team rather than one long chat:
+- The coordinating session (Sonnet at first, switched to Opus once the plan was set) wrote the product brief, the PRD, a shared typed contract, a mock engine and a file-ownership plan, so four agents could work in parallel without touching the same files.
+- Four Sonnet agents: UI, engine, evaluation set, and research (current Groq model IDs, recording settings, data retention, then API cost).
+- Research changed decisions: the cheaper Whisper model, strict JSON-schema output, smaller recordings, and keeping one transcription per answer despite the 10 s minimum billing.
+- The engine agent stalled before wiring its platform layer; the coordinator finished those four files.
+- The evaluation set caught a real safety miss ("thinking about ending my life" did not fire) and several false alarms on denials, plus a grounding bug with the Polish filler "no". The coordinator fixed all three and added regression tests, including a guard so "I'm not sure, maybe chest pain" is never read as a denial.
+
+Full logs of the coordinator and all four agents are attached.
 
 ## Verified
-- Full flow run in the browser with a real Groq key: Polish patient, 8 typed answers, one summary call, doctor card with every SAMPLE/OPQRST field grounded in the patient's words, FHIR bundle, wipe. After the wipe, localStorage, sessionStorage, cookies and IndexedDB were empty.
+- Speech-to-text: one live Polish clip sent through the engine's own Groq client; transcript correct.
+- Full flow run in the browser with a real Groq key (answers typed, since the test browser had no microphone): Polish patient, 8 answers, one summary call, doctor card with every SAMPLE/OPQRST field grounded in the patient's words, FHIR bundle, wipe. After the wipe, localStorage, sessionStorage, cookies and IndexedDB were empty.
 - Ukrainian chest-pain answer → emergency screen immediately, with no API call.
 - 178 offline tests pass (red-flag recall and negation in pl/en/uk, quote grounding, call limits); the LLM eval above ran against Groq.
 - Models: `whisper-large-v3-turbo` for speech-to-text, `openai/gpt-oss-120b` with strict JSON schema for the summary.
