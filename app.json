@@ -23,7 +23,12 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-audio"
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Voice Intake records your spoken answers to transcribe them. Audio is deleted right after transcription."
+        }
+      ]
     ]
   }
 }

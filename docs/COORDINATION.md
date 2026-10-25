@@ -24,16 +24,26 @@ Requirements: `docs/prd/voice-intake.prd.md`. Brief: `docs/PRODUCT-BRIEF.md`.
 | Coordinator | `src/contract/**`, `docs/COORDINATION.md`, `docs/WHY.md`, `docs/prd/**` | Contract changes go through the coordinator |
 | UI worker | `src/app/**`, `src/ui/**`, `App.tsx`, `index.ts`, `app.json`, `package.json` deps, `assets/**` | Only worker allowed to add dependencies (`npx expo install`) |
 | Engine worker | `src/engine/**` | No new dependencies: uses `fetch`, `expo-file-system`, `expo-secure-store` |
-| Eval worker | `eval/**` | Uses vitest (installed). Imports only `src/engine/index.ts` and `src/contract/**` |
+| Eval worker | `eval/**` | Uses vitest (installed). Imports only `src/engine/core/**` and `src/contract/**` (never expo modules) |
 | Research worker | `docs/research/**` | Writes no code |
+
+## Shared working tree rules
+- Workers never commit, stash, reset or checkout. The coordinator commits after integration.
+- Typecheck your own files only; ignore errors in files another worker is still writing.
+- The GateGuard hook blocks the first write to each new file: restate the facts it asks for (callers, schema, instruction) and retry once.
+- Routing: no Expo Router. One flow, so `App.tsx` holds a small screen state machine; screens live in `src/ui/screens/`.
+- Groq accepts browser requests (CORS `*`, checked 2026-10-25), so web is the primary demo platform.
 
 ## Shared interfaces
 - `src/contract/types.ts`: all types, `IntakeEngine`, `KeyStore`.
 - `src/contract/mockEngine.ts`: offline engine the UI uses until the real one exists.
-- The engine worker exports from `src/engine/index.ts`:
-  - `createIntakeEngine: CreateIntakeEngine`
-  - `keyStore: KeyStore`
-  - `checkRedFlags(text: string, turnId: string): RedFlagHit | null` (pure, no network; used by eval)
+- The engine is split so the core runs in Node (vitest) without expo:
+  - `src/engine/core/**` — pure TypeScript, no expo or react-native imports: `questions.ts`, `redFlags.ts`, `groq.ts` (fetch), `summarize.ts`, `verifyQuotes.ts`, `fhir.ts`, `session.ts` (an `IntakeEngine` whose audio transcription is injected).
+  - `src/engine/platform/**` — `audio.ts` (blob vs file URI, deletion) and `keyStore.ts` (expo-secure-store; nothing persisted on web).
+  - `src/engine/index.ts` exports `createIntakeEngine: CreateIntakeEngine` and `keyStore: KeyStore` (wires core + platform).
+  - `src/engine/core/index.ts` exports `createCoreEngine(config, transcribe?)`, `checkRedFlags(text, turnId): RedFlagHit | null`, `verifyQuotes`, `buildFhir`. Eval uses only these.
+- Audio deletion by platform: web — `fetch(blobUrl)` → Blob → FormData → `URL.revokeObjectURL`; native — FormData `{uri, name, type}` → delete with the SDK 58 `expo-file-system` API (read versioned docs). Delete in `finally`.
+- Quote verification: normalise both sides (lowercase, NFC, strip punctuation, collapse whitespace) and accept a quote if it is a substring of the normalised transcript or ≥ 80% of its tokens appear in order in one turn. Facts failing that are dropped and counted.
 - The UI imports the engine only from `src/engine` (falling back to the mock when no key is set) and never reaches into engine internals.
 
 ## Engine design decisions (fixed)
