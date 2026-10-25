@@ -1,7 +1,7 @@
 // Grounding check: every fact on the card must quote the patient's own words.
 // Facts whose quote cannot be found in the transcript are dropped and counted.
 
-import type { Fact, IntakeSummary, QuestionId, Turn } from '../../contract/types';
+import type { Fact, IntakeSummary, PatientLanguage, QuestionId, Turn } from '../../contract/types';
 
 /** Lowercase, NFC, apostrophes removed, other punctuation -> space, whitespace collapsed. */
 export function normalizeText(s: string): string {
@@ -44,7 +44,10 @@ function lcsLength(a: string[], b: string[]): number {
   return prev[b.length];
 }
 
-function matchNormalized(nq: string, na: string): boolean {
+/** In Polish "no" is a filler ("No... osiem na dziesięć"), not a negation. */
+const NEGATORS_PL = new Set([...NEGATORS].filter((t) => t !== 'no'));
+
+function matchNormalized(nq: string, na: string, NEGATORS: Set<string>): boolean {
   if (!nq || !na) return false;
   const qt = nq.split(' ');
   const at = na.split(' ');
@@ -83,19 +86,24 @@ function matchNormalized(nq: string, na: string): boolean {
 }
 
 /** True if `quote` is supported by `answer` (exact substring or >= 80% in-order tokens). */
-export function quoteSupported(quote: string, answer: string): boolean {
+export function quoteSupported(quote: string, answer: string, language?: PatientLanguage): boolean {
   const nq = normalizeText(quote);
   const na = normalizeText(answer);
   if (!nq || !na) return false;
-  if (matchNormalized(nq, na)) return true;
+  const negators = language === 'pl' ? NEGATORS_PL : NEGATORS;
+  if (matchNormalized(nq, na, negators)) return true;
   const fq = foldDiacritics(nq);
   const fa = foldDiacritics(na);
-  return fq !== nq || fa !== na ? matchNormalized(fq, fa) : false;
+  return fq !== nq || fa !== na ? matchNormalized(fq, fa, negators) : false;
 }
 
 type OneFact = Fact | null;
 
-function checkFact<T extends Fact>(fact: T | null | undefined, turns: Turn[]): { fact: T | null; dropped: boolean } {
+function checkFact<T extends Fact>(
+  fact: T | null | undefined,
+  turns: Turn[],
+  language?: PatientLanguage,
+): { fact: T | null; dropped: boolean } {
   if (!fact) return { fact: null, dropped: false };
   const value = typeof fact.value === 'string' ? fact.value.trim() : '';
   const quote = typeof fact.quote === 'string' ? fact.quote.trim() : '';
@@ -103,7 +111,7 @@ function checkFact<T extends Fact>(fact: T | null | undefined, turns: Turn[]): {
 
   const claimed = turns.find((t) => t.id === fact.turnId);
   const ordered = claimed ? [claimed, ...turns.filter((t) => t !== claimed)] : turns;
-  const support = ordered.find((t) => quoteSupported(quote, t.answerText));
+  const support = ordered.find((t) => quoteSupported(quote, t.answerText, language));
   if (!support) return { fact: null, dropped: true };
 
   return {
@@ -122,11 +130,11 @@ function checkFact<T extends Fact>(fact: T | null | undefined, turns: Turn[]): {
  * Returns a copy of `summary` that only contains facts grounded in the transcript.
  * Fills `droppedUnsupported` (added to any existing count) and `missing`.
  */
-export function verifyQuotes(summary: IntakeSummary, turns: Turn[]): IntakeSummary {
+export function verifyQuotes(summary: IntakeSummary, turns: Turn[], language?: PatientLanguage): IntakeSummary {
   let dropped = 0;
 
   const one = (f: OneFact): OneFact => {
-    const r = checkFact(f, turns);
+    const r = checkFact(f, turns, language);
     if (r.dropped) dropped += 1;
     return r.fact;
   };
@@ -134,7 +142,7 @@ export function verifyQuotes(summary: IntakeSummary, turns: Turn[]): IntakeSumma
     const out: Fact[] = [];
     const seen = new Set<string>();
     for (const f of list ?? []) {
-      const r = checkFact(f, turns);
+      const r = checkFact(f, turns, language);
       if (r.dropped) dropped += 1;
       if (!r.fact) continue;
       const key = normalizeText(r.fact.value);
@@ -147,7 +155,7 @@ export function verifyQuotes(summary: IntakeSummary, turns: Turn[]): IntakeSumma
 
   let severity: IntakeSummary['opqrst']['severity'] = null;
   if (summary.opqrst.severity) {
-    const r = checkFact(summary.opqrst.severity, turns);
+    const r = checkFact(summary.opqrst.severity, turns, language);
     if (r.dropped) dropped += 1;
     if (r.fact) {
       let score: number | null = summary.opqrst.severity.score;

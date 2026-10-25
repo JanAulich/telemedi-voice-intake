@@ -118,3 +118,13 @@ describe('verifyQuotes', () => {
     expect(s.droppedUnsupported).toBe(0);
   });
 });
+
+describe('Polish filler "no"', () => {
+  it('keeps quotes that follow the filler in Polish answers', () => {
+    expect(quoteSupported('osiem na dziesięć', 'No... osiem na dziesięć, chyba.', 'pl')).toBe(true);
+    expect(quoteSupported('boli mnie w klatce piersiowej', 'Dzień dobry, no... boli mnie w klatce piersiowej, od rana.', 'pl')).toBe(true);
+  });
+  it('still treats "no" as a negation in English', () => {
+    expect(quoteSupported('chest pain', 'no chest pain', 'en')).toBe(false);
+  });
+});

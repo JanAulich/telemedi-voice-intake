@@ -1,0 +1,27 @@
+{
+  "id": "08-pl-skin-rash",
+  "patientLanguage": "pl",
+  "doctorLanguage": "pl",
+  "persona": "Invented patient: 36-year-old man with an itchy rash on the forearm after a forest walk. Pollen allergy, no medications. Allergy mention must NOT be read as anaphylaxis.",
+  "tags": ["routine"],
+  "answers": {
+    "chief_complaint": "Mam, no, taką wysypkę na przedramieniu i strasznie swędzi.",
+    "onset": "Od dwóch dni, po tym jak byłem w lesie na grzybach.",
+    "severity": "Swędzenie to tak na pięć.",
+    "associated_symptoms": "Trochę jest czerwone i ciepłe, ale gorączki nie mam.",
+    "medications": "Nic nie biorę.",
+    "allergies": "Na pyłki trochę, na brzozę, ale na leki nie.",
+    "past_history": "Astma w dzieciństwie, teraz już nie.",
+    "events": "Na obiad zjadłem zupę pomidorową, nic dziwnego."
+  },
+  "expected": {
+    "redFlag": null,
+    "redFlagQuestionId": null,
+    "chiefComplaint": ["wysyp", "swęd"],
+    "onset": ["dwa dni", "dwóch dni", "2 dni", "las"],
+    "severityScore": 5,
+    "allergies": [["pyłk", "brzoz"]],
+    "medications": [],
+    "missing": []
+  }
+}

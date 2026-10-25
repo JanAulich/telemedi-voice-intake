@@ -1,0 +1,27 @@
+{
+  "id": "10-pl-sprained-ankle",
+  "patientLanguage": "pl",
+  "doctorLanguage": "en",
+  "persona": "Invented patient: 31-year-old man who twisted his ankle on a curb. Self-corrects the pain score (eight, no, seven). Aspirin allergy, took an NSAID.",
+  "tags": ["routine", "drug_allergy", "self_correction"],
+  "answers": {
+    "chief_complaint": "Skręciłem kostkę wczoraj na krawężniku, jest opuchnięta i boli przy chodzeniu.",
+    "onset": "Wczoraj wieczorem, potknąłem się wracając do domu.",
+    "severity": "Osiem... nie, siedem, jak stanę na tej nodze.",
+    "associated_symptoms": "Opuchlizna i siniak, nie mogę normalnie chodzić. Palce w stopie czuję normalnie.",
+    "medications": "Wziąłem dwa razy ketonal i przykładałem lód.",
+    "allergies": "Uczulony jestem na aspirynę, dostaję po niej wysypki.",
+    "past_history": "Operację kolana miałem trzy lata temu, lewego.",
+    "events": "Ostatni posiłek to kolacja wczoraj, a dziś rano tylko kawa."
+  },
+  "expected": {
+    "redFlag": null,
+    "redFlagQuestionId": null,
+    "chiefComplaint": ["ankle", "kostk"],
+    "onset": ["yesterday", "wczoraj", "evening", "curb", "tripped"],
+    "severityScore": 7,
+    "allergies": [["aspirin", "aspiryn", "acetylsalicyl"]],
+    "medications": [["ketonal", "ketoprofen"]],
+    "missing": []
+  }
+}

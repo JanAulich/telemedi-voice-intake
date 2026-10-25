@@ -1,0 +1,27 @@
+{
+  "id": "03-en-suicidal-statement",
+  "patientLanguage": "en",
+  "doctorLanguage": "en",
+  "persona": "Invented patient: 34-year-old expatriate, insomnia and low mood after losing a job, states suicidal thoughts in the symptoms answer.",
+  "tags": ["red_flag"],
+  "answers": {
+    "chief_complaint": "I can't sleep, like at all. It's been going on for about three weeks now.",
+    "onset": "Um, since I lost my job, so about three weeks ago I guess.",
+    "severity": "Honestly like a seven, it's pretty bad.",
+    "associated_symptoms": "I feel really low all the time. And, uh, honestly I've been thinking about ending my life, I don't see the point anymore.",
+    "medications": "Nothing really, just melatonin sometimes.",
+    "allergies": "No allergies.",
+    "past_history": "I had depression a few years ago, nothing since.",
+    "events": "Had some tea and toast this morning, I haven't really been eating much."
+  },
+  "expected": {
+    "redFlag": "suicidal_ideation",
+    "redFlagQuestionId": "associated_symptoms",
+    "chiefComplaint": ["sleep", "insomnia"],
+    "onset": ["three weeks", "3 weeks", "job"],
+    "severityScore": 7,
+    "allergies": [],
+    "medications": [["melatonin"]],
+    "missing": []
+  }
+}

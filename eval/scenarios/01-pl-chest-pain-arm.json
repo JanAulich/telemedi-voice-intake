@@ -1,0 +1,27 @@
+{
+  "id": "01-pl-chest-pain-arm",
+  "patientLanguage": "pl",
+  "doctorLanguage": "pl",
+  "persona": "Invented patient: 58-year-old man on a business trip, pressure in the chest radiating to the left arm after climbing stairs. Hypertensive.",
+  "tags": ["red_flag"],
+  "answers": {
+    "chief_complaint": "Dzień dobry, no... boli mnie w klatce piersiowej, taki ucisk, jakby ktoś mi kamień położył, i to promieniuje do lewej ręki.",
+    "onset": "Zaczęło się jakieś, yyy, godzinę temu, jak szedłem po schodach do hotelu.",
+    "severity": "No... osiem na dziesięć, chyba.",
+    "associated_symptoms": "Pocę się cały i jest mi niedobrze, mdłości takie.",
+    "medications": "Biorę leki na ciśnienie, enalapril, i jedną tabletkę na cholesterol, atorwastatynę.",
+    "allergies": "Nie, na nic nie jestem uczulony.",
+    "past_history": "Nadciśnienie mam od dziesięciu lat, poza tym nic.",
+    "events": "Dziś rano zjadłem śniadanie, kanapki i kawę, a potem poszedłem na spotkanie."
+  },
+  "expected": {
+    "redFlag": "chest_pain",
+    "redFlagQuestionId": "chief_complaint",
+    "chiefComplaint": ["klatk", "ucisk", "chest"],
+    "onset": ["godzin", "schod", "hour", "stairs"],
+    "severityScore": 8,
+    "allergies": [],
+    "medications": [["enalapril"], ["atorwastatyn", "atorvastatin"]],
+    "missing": []
+  }
+}

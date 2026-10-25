@@ -1,0 +1,27 @@
+{
+  "id": "06-uk-dont-know",
+  "patientLanguage": "uk",
+  "doctorLanguage": "en",
+  "persona": "Invented patient: 72-year-old man, abdominal pain, vague and unsure; answers 'I don't know' to onset, severity, associated symptoms, medications and past history.",
+  "tags": ["dont_know"],
+  "answers": {
+    "chief_complaint": "Болить живіт, ну, десь тут, внизу.",
+    "onset": "Не знаю... не пам'ятаю, коли почалося.",
+    "severity": "Не знаю, важко сказати.",
+    "associated_symptoms": "Ем... не знаю, не можу сказати.",
+    "medications": "Не знаю, не пам'ятаю.",
+    "allergies": "Алергії, здається, нема.",
+    "past_history": "Не знаю, лікарі мені нічого не казали.",
+    "events": "Вчора ввечері їв пельмені, а потім вже було погано."
+  },
+  "expected": {
+    "redFlag": null,
+    "redFlagQuestionId": null,
+    "chiefComplaint": ["abdom", "stomach", "belly", "живіт"],
+    "onset": null,
+    "severityScore": null,
+    "allergies": [],
+    "medications": [],
+    "missing": ["onset", "severity", "associated_symptoms", "medications", "past_history"]
+  }
+}

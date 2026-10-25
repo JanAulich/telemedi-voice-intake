@@ -153,7 +153,7 @@ export function createCoreEngine(
     }
     // Deterministic from here: re-grounded against the CURRENT transcript (edits after the call stay safe).
     const tCopy = turns.map((t) => ({ ...t }));
-    const summary = verifyQuotes(rawSummary, tCopy);
+    const summary = verifyQuotes(rawSummary, tCopy, patientLanguage);
     const flags = redFlags.map((r) => ({ ...r }));
     const fhir = buildFhir(
       { patientLanguage, doctorLanguage, turns: tCopy, redFlags: flags, summary },

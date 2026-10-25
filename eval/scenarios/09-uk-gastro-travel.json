@@ -1,0 +1,27 @@
+{
+  "id": "09-uk-gastro-travel",
+  "patientLanguage": "uk",
+  "doctorLanguage": "en",
+  "persona": "Invented patient: 27-year-old Ukrainian woman on holiday, nausea and loose stools after a restaurant dinner. Penicillin allergy, takes contraceptive pill.",
+  "tags": ["routine", "drug_allergy"],
+  "answers": {
+    "chief_complaint": "Мене нудить і вже другий день рідкий стілець, ми були у відпустці в Туреччині.",
+    "onset": "Позавчора ввечері, ну, після вечері в ресторані.",
+    "severity": "Чотири з десяти. Більше неприємно, ніж боляче.",
+    "associated_symptoms": "Є невелика температура, тридцять сім і вісім, і слабкість.",
+    "medications": "Випила активоване вугілля, і ще постійно п'ю протизаплідні таблетки.",
+    "allergies": "Так, є алергія на пеніцилін.",
+    "past_history": "Нічого, я здорова.",
+    "events": "Останній раз їла вчора вдень, суп, а потім вже не могла їсти."
+  },
+  "expected": {
+    "redFlag": null,
+    "redFlagQuestionId": null,
+    "chiefComplaint": ["nausea", "diarrh", "stool", "нудит"],
+    "onset": ["two days", "2 days", "yesterday", "day before", "dinner", "restaurant"],
+    "severityScore": 4,
+    "allergies": [["penicillin", "пеніцилін"]],
+    "medications": [["charcoal", "вугілл"], ["contracept", "birth control", "протизапл"]],
+    "missing": []
+  }
+}

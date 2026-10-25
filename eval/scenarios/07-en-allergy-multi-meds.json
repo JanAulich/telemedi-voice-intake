@@ -1,0 +1,27 @@
+{
+  "id": "07-en-allergy-multi-meds",
+  "patientLanguage": "en",
+  "doctorLanguage": "pl",
+  "persona": "Invented patient: 52-year-old expatriate with low back pain after moving house. Two drug/material allergies and three regular medications.",
+  "tags": ["drug_allergy", "multi_medication"],
+  "answers": {
+    "chief_complaint": "I've had a bad pain in my lower back for about a week, kind of a dull ache that goes down my right leg.",
+    "onset": "About a week ago, I was lifting boxes when I moved house.",
+    "severity": "I'd say six out of ten.",
+    "associated_symptoms": "Some tingling in my right foot. Um, nothing else really.",
+    "medications": "I take metformin, twice a day, lisinopril for my blood pressure, and ibuprofen for the back, like three times a day.",
+    "allergies": "Yes, I'm allergic to penicillin, I got a bad rash when I was a kid. And latex too, my hands go all itchy.",
+    "past_history": "Type 2 diabetes and high blood pressure. Had my appendix out in 2015.",
+    "events": "Had breakfast around eight, oatmeal, and took my pills with it."
+  },
+  "expected": {
+    "redFlag": null,
+    "redFlagQuestionId": null,
+    "chiefComplaint": ["plec", "lędźw", "krzyż", "back"],
+    "onset": ["tydzie", "tygodni", "week", "7 dni"],
+    "severityScore": 6,
+    "allergies": [["penicylin", "penicillin"], ["lateks", "latex"]],
+    "medications": [["metformin"], ["lizynopryl", "lisinopril"], ["ibuprofen"]],
+    "missing": []
+  }
+}

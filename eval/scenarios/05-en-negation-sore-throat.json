@@ -1,0 +1,27 @@
+{
+  "id": "05-en-negation-sore-throat",
+  "patientLanguage": "en",
+  "doctorLanguage": "pl",
+  "persona": "Invented patient: 41-year-old tourist with a sore throat and mild fever. Says 'no chest pain, no shortness of breath, haven't fainted' (negation trap, must NOT escalate).",
+  "tags": ["negation"],
+  "answers": {
+    "chief_complaint": "I've got a really sore throat and a bit of a cough.",
+    "onset": "Started about, uh, three days ago.",
+    "severity": "Maybe a four out of ten.",
+    "associated_symptoms": "A bit of a fever, thirty-eight or so. No chest pain, no shortness of breath, I'm breathing fine. Haven't fainted or anything like that.",
+    "medications": "Just paracetamol, a couple of times a day.",
+    "allergies": "None that I know of.",
+    "past_history": "Nothing, I'm generally healthy.",
+    "events": "Had soup for lunch, then I took the paracetamol around two."
+  },
+  "expected": {
+    "redFlag": null,
+    "redFlagQuestionId": null,
+    "chiefComplaint": ["gardł", "throat", "kaszel"],
+    "onset": ["3 dni", "trzy dni", "3 dni temu", "three days", "3 days"],
+    "severityScore": 4,
+    "allergies": [],
+    "medications": [["paracetamol"]],
+    "missing": []
+  }
+}

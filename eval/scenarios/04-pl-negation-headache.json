@@ -1,0 +1,27 @@
+{
+  "id": "04-pl-negation-headache",
+  "patientLanguage": "pl",
+  "doctorLanguage": "en",
+  "persona": "Invented patient: 29-year-old office worker, dull frontal headache since yesterday. Explicitly denies chest pain, breathlessness and fainting (negation trap, must NOT escalate).",
+  "tags": ["negation"],
+  "answers": {
+    "chief_complaint": "Boli mnie głowa, taki tępy ból z przodu, od wczoraj.",
+    "onset": "Od wczoraj wieczorem, po całym dniu przed komputerem.",
+    "severity": "Trzy na dziesięć. Do wytrzymania.",
+    "associated_symptoms": "Nie, nie mam bólu w klatce piersiowej, nie mam duszności, nie zemdlałem, nic takiego. Tylko trochę światło mnie razi.",
+    "medications": "Wziąłem wczoraj ibuprofen, dwie tabletki, i tyle.",
+    "allergies": "Nie mam alergii.",
+    "past_history": "Nic poważnego, czasem migrena.",
+    "events": "Wczoraj późno kolacja, makaron, potem do łóżka o północy, spałem słabo."
+  },
+  "expected": {
+    "redFlag": null,
+    "redFlagQuestionId": null,
+    "chiefComplaint": ["headache", "głow"],
+    "onset": ["yesterday", "wczoraj", "evening", "computer"],
+    "severityScore": 3,
+    "allergies": [],
+    "medications": [["ibuprofen"]],
+    "missing": []
+  }
+}

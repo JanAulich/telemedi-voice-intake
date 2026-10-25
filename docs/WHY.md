@@ -45,7 +45,16 @@ For a real product, cost only matters if quality holds: an intake that is often 
 - A cheaper summary model is acceptable only if field capture stays at least 90% and within 5 points of the larger model, with zero unsupported facts reaching the doctor.
 - Speech-to-text (Whisper turbo vs large-v3) cannot be judged on scripted text; it needs recordings from native Polish and Ukrainian speakers, scored by word error rate and by downstream field capture. That is the next experiment, not something to guess.
 
-<!-- TODO: insert measured 120b vs 20b table from eval/results.md -->
+Measured on the 10 scripted patients (typed text, so speech-to-text is excluded):
+
+| Summary model | Field capture | Severity / allergies / meds correct | Unsupported facts reaching the card | Mean summary time | LLM cost per intake |
+|---|---|---|---|---|---|
+| openai/gpt-oss-120b | 93.0% | 90% / 100% / 100% | 0 of 108 | 3.2 s | ~$0.0011 |
+| openai/gpt-oss-20b | 94.7% | 90% / 100% / 100% | 0 of 104 | 1.3 s | ~$0.0004 |
+
+The smaller model passes the gate on this set, at 2.5× faster and ~60% cheaper. Ten scenarios is a coarse signal, so the product keeps 120b until a larger set confirms it. Part of the capture loss on both models came from a grounding bug (Polish filler "no" read as a negation, dropping valid facts), fixed after this run; capture should be somewhat higher on a re-run.
+
+Whole intake today is roughly $0.004 (speech-to-text is ~80% of it, billed at a 10 s minimum per answer); about $0.0015 with the cheaper models. I kept one transcription per answer anyway: batching would save only ~8% and remove the per-answer red-flag check.
 
 ## What production would need
 A data-processing agreement and EU-hosted processing for speech and LLM calls (Groq processes in the US and, without zero-data-retention enabled, may keep request logs for up to 30 days for abuse monitoring — fine for test data, not for patients), clinician sign-off on the red-flag list, a pilot measuring intake minutes saved, and integration with Telemedi's consultation system.
@@ -53,4 +62,16 @@ A data-processing agreement and EU-hosted processing for speech and LLM calls (G
 ## How it was built
 Coordinated with Claude Code: one Opus session wrote the brief, PRD, shared contract and file-ownership plan, then four Sonnet agents worked in parallel on the engine, UI, evaluation set and a fact-checking research note. Full logs are attached.
 
-<!-- TODO after integration: screenshots, eval numbers, model IDs, known limitations -->
+## Verified
+- Full flow run in the browser with a real Groq key: Polish patient, 8 typed answers, one summary call, doctor card with every SAMPLE/OPQRST field grounded in the patient's words, FHIR bundle, wipe. After the wipe, localStorage, sessionStorage, cookies and IndexedDB were empty.
+- Ukrainian chest-pain answer → emergency screen immediately, with no API call.
+- 178 offline tests pass (red-flag recall and negation in pl/en/uk, quote grounding, call limits); the LLM eval above ran against Groq.
+- Models: `whisper-large-v3-turbo` for speech-to-text, `openai/gpt-oss-120b` with strict JSON schema for the summary.
+
+## Known limitations
+- Not verified: real microphone recording (the test browser had no mic) and iOS/Android devices. The code paths exist; they need a manual run.
+- Speech-to-text quality on Polish/Ukrainian medical vocabulary is unmeasured (needs native-speaker recordings).
+- Red-flag rules are keyword-based; they were tested on ~50 phrasings, not validated by a clinician.
+- The model sometimes produces a severity value for "I don't know"; it is shown with its quote, so the doctor sees the source.
+
+Screenshots: `docs/screenshots/`.

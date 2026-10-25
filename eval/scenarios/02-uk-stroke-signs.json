@@ -1,0 +1,27 @@
+{
+  "id": "02-uk-stroke-signs",
+  "patientLanguage": "uk",
+  "doctorLanguage": "pl",
+  "persona": "Invented patient: 67-year-old Ukrainian woman visiting family in Poland, sudden numb right arm, drooping face and slurred speech while cooking.",
+  "tags": ["red_flag"],
+  "answers": {
+    "chief_complaint": "У мене раптом заніміла права рука, і, ну, обличчя якесь перекошене, і мова нечітка, язик не слухається.",
+    "onset": "Півгодини тому, я якраз готувала обід.",
+    "severity": "Біль не сильний, голова трохи болить, ну, три з десяти.",
+    "associated_symptoms": "Паморочиться в голові, і бачу гірше на одне око.",
+    "medications": "Приймаю таблетки від тиску, лозартан, і аспірин щоранку.",
+    "allergies": "Алергії немає.",
+    "past_history": "Тиск високий уже давно, і діабет другого типу.",
+    "events": "Снідала вранці, кашу з молоком і чай, більше нічого."
+  },
+  "expected": {
+    "redFlag": "stroke_signs",
+    "redFlagQuestionId": "chief_complaint",
+    "chiefComplaint": ["rę", "twarz", "mow", "mów", "рук", "обличч", "мова"],
+    "onset": ["pół godzin", "30 min", "півгодини", "obiad", "обід"],
+    "severityScore": 3,
+    "allergies": [],
+    "medications": [["losartan", "лозартан"], ["aspiryn", "аспірин"]],
+    "missing": []
+  }
+}
